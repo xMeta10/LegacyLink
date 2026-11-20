@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LegacyLink — Конвертер данных со старых измерительных приборов</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        surface: '#F8F9FA',
+                        ink: '#111827',
+                        muted: '#4B5563',
+                        borderSubtle: '#E5E7EB',
+                        brand: '#1D4ED8',
+                        brandHover: '#1E40AF',
+                        statusOk: '#059669',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F8F9FA;
+            color: #111827;
+            font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        }
+        .card-clean {
+            background-color: #FFFFFF;
+            border: 1px solid #E5E7EB;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- 1. КОМПАКТНАЯ ШАПКА -->
+    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <!-- Логотип -->
+            <a href="#" class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-blue-700 text-white flex items-center justify-center font-mono font-semibold text-sm">
+                    LL
+                </div>
+                <span class="font-bold text-lg tracking-tight text-gray-900">LegacyLink</span>
+                <span class="hidden sm:inline-block text-xs font-mono text-gray-500 border-l border-gray-200 pl-2.5">
+                    v1.0 MVP
+                </span>
+            </a>
+
+            <!-- Навигация -->
+            <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-gray-600">
+                <a href="#problem" class="hover:text-gray-900 transition-colors">Задача</a>
+                <a href="#how-it-works" class="hover:text-gray-900 transition-colors">Как работает</a>
+                <a href="#pricing" class="hover:text-gray-900 transition-colors">Тарифы</a>
+                <a href="#contacts" class="hover:text-gray-900 transition-colors">Контакты</a>
+            </nav>
+
+            <!-- Кнопка -->
+            <div class="flex items-center gap-3">
+                <a href="#contacts" onclick="presetRequest('Тест на 3 файлах')" class="px-4 py-2 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium transition-colors">
+                    Попробовать демо
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. ПЕРВЫЙ ЭКРАН (HERO) -->
+    <section class="py-12 sm:py-16 lg:py-20 bg-white border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+                
+                <!-- Левая колонка -->
+                <div class="lg:col-span-6 space-y-5">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-gray-100 border border-gray-200 text-xs font-mono text-gray-700">
+                        <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                        Проект поддержан ФСИ • Заявка №627768
+                    </div>
+
+                    <h1 class="text-3xl sm:text-4xl lg:text-[40px] font-bold tracking-tight text-gray-900 leading-[1.15]">
+                        Конвертер данных со старых измерительных приборов в CSV, TXT и SQLite
+                    </h1>
+
+                    <p class="text-base sm:text-lg text-gray-600 leading-relaxed">
+                        Десктопное ПО для инженеров и метрологов. Открывает бинарные архивы осциллографов, спектрометров и анализаторов напрямую на <span class="font-medium text-gray-900">Windows 10/11</span> — без виртуальных машин, поиска б/у приборов и ручного разбора байтов.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                        <a href="#contacts" onclick="presetRequest('Бесплатный тест на 3 файлах')" class="px-5 py-3 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-medium text-sm text-center transition-colors">
+                            Тест на 3 файлах бесплатно
+                        </a>
+                        <a href="#contacts" onclick="presetRequest('Разбор редкого формата')" class="px-5 py-3 rounded-lg bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-medium text-sm text-center transition-colors">
+                            Отправить свой формат
+                        </a>
+                    </div>
+
+                    <div class="pt-4 border-t border-gray-100 flex flex-wrap gap-x-6 gap-y-2 text-xs font-mono text-gray-500">
+                        <span>✓ Пакетная обработка папок</span>
+                        <span>✓ Сохранение метаданных (Гц, В/дел)</span>
+                        <span>✓ Локальная работа без облака</span>
+                    </div>
+                </div>
+
+                <!-- Правая колонка: Реалистичное окно десктопной программы (Qt / Windows стиль) -->
+                <div class="lg:col-span-6">
+                    <div class="rounded-xl border border-gray-300 bg-white shadow-sm overflow-hidden">
+                        <!-- Заголовок окна ОС -->
+                        <div class="bg-gray-100 border-b border-gray-200 px-3.5 py-2 flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-gray-300"></span>
+                                <span class="ml-1.5 text-xs font-mono text-gray-700 font-medium">LegacyLink Desktop — Конвертер форматов</span>
+                            </div>
+                            <span class="text-[11px] font-mono text-gray-500">Win11 x64</span>
+                        </div>
+
+                        <!-- Панель выбора примера файла (Табы приборов) -->
+                        <div class="bg-gray-50 border-b border-gray-200 px-3 py-2 flex flex-wrap items-center gap-1.5">
+                            <span class="text-[11px] font-mono text-gray-500 mr-1">Файл:</span>
+                            <button onclick="switchDevice('osc')" id="tab-osc" class="px-2.5 py-1 rounded text-xs font-mono font-medium bg-white text-blue-700 border border-gray-300 shadow-2xs cursor-pointer">
+                                osc_1999.bin
+                            </button>
+                            <button onclick="switchDevice('spec')" id="tab-spec" class="px-2.5 py-1 rounded text-xs font-mono text-gray-600 hover:text-gray-900 border border-transparent cursor-pointer">
+                                spec_2004.dat
+                            </button>
+                            <button onclick="switchDevice('logic')" id="tab-logic" class="px-2.5 py-1 rounded text-xs font-mono text-gray-600 hover:text-gray-900 border border-transparent cursor-pointer">
+                                dump_01.wfm
+                            </button>
+                        </div>
+
+                        <!-- Внутренняя область программы -->
+                        <div class="p-4 space-y-4">
+                            <!-- Строка статуса дешифратора -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200 text-xs">
+                                <span class="font-mono text-emerald-800 font-medium" id="app-sig-status">
+                                    [OK] Сигнатура распознана: Tektronix Binary (Offset 0x0040, Float32)
+                                </span>
+                                <span class="font-mono text-emerald-700 text-[11px]" id="app-points-count">4 096 точек</span>
+                            </div>
+
+                            <!-- Извлеченные метаданные -->
+                            <div class="grid grid-cols-3 gap-2 text-xs font-mono">
+                                <div class="p-2.5 rounded-lg bg-gray-50 border border-gray-200">
+                                    <div class="text-[10px] text-gray-500 uppercase">Частота (Fs)</div>
+                                    <div class="font-semibold text-gray-900 mt-0.5" id="meta-freq">100.0 кГц</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-gray-50 border border-gray-200">
+                                    <div class="text-[10px] text-gray-500 uppercase">Масштаб</div>
+                                    <div class="font-semibold text-gray-900 mt-0.5" id="meta-scale">2.50 В/дел</div>
+                                </div>
+                                <div class="p-2.5 rounded-lg bg-gray-50 border border-gray-200">
+                                    <div class="text-[10px] text-gray-500 uppercase">Дата замера</div>
+                                    <div class="font-semibold text-gray-900 mt-0.5" id="meta-date">14.11.1999</div>
+                                </div>
+                            </div>
+
+                            <!-- Чистый график осциллограммы -->
+                            <div class="border border-gray-200 rounded-lg bg-white p-2">
+                                <div class="flex items-center justify-between text-[11px] font-mono text-gray-500 mb-1 px-1">
+                                    <span id="chart-label">CH1: Напряжение (В) / Время (мс)</span>
+                                    <span>Предпросмотр сигнала</span>
+                                </div>
+                                <div class="h-40 w-full">
+                                    <canvas id="appPreviewCanvas" class="w-full h-full block"></canvas>
+                                </div>
+                            </div>
+
+                            <!-- Нижняя панель экспорта -->
+                            <div class="pt-1 flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex items-center gap-2 text-xs font-mono text-gray-600">
+                                    <span>Формат вывода:</span>
+                                    <span class="px-2 py-0.5 rounded bg-gray-100 border border-gray-200 font-semibold text-gray-800">UTF-8 CSV</span>
+                                    <span class="px-2 py-0.5 rounded bg-gray-100 border border-gray-200 text-gray-600">SQLite</span>
+                                </div>
+                                <button onclick="downloadSampleCsv()" class="px-3.5 py-1.5 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-xs font-medium transition-colors cursor-pointer">
+                                    Экспорт в CSV ↓
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. ПРОБЛЕМА → РЕШЕНИЕ + ИНФОГРАФИКА «БЫЛО → СТАЛО» -->
+    <section id="problem" class="py-14 sm:py-16 border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-10">
+            
+            <!-- Двухколоночная сетка: Проблема и Решение -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Проблема -->
+                <div class="card-clean rounded-xl p-6 sm:p-7">
+                    <div class="text-xs font-mono font-semibold uppercase tracking-wider text-gray-500 mb-2">Текущая ситуация на предприятиях</div>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Почему старые архивы лежат мёртвым грузом</h2>
+                    <ul class="space-y-3 text-sm text-gray-700">
+                        <li class="flex items-start gap-2.5">
+                            <span class="font-mono text-red-600 font-bold mt-0.5">×</span>
+                            <span><strong>Закрытые форматы:</strong> за 10–20 лет накоплены терабайты осциллограмм и спектров в проприетарных расширениях без документации.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="font-mono text-red-600 font-bold mt-0.5">×</span>
+                            <span><strong>Несовместимость с Windows 10/11:</strong> штатное ПО приборов писалось под Win 95/98/XP с устаревшими драйверами и LPT-ключами.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="font-mono text-red-600 font-bold mt-0.5">×</span>
+                            <span><strong>Затраты на б/у железо:</strong> для чтения дисков приходится искать списанные приборы на вторичном рынке без гарантий и запчастей.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Решение -->
+                <div class="card-clean rounded-xl p-6 sm:p-7">
+                    <div class="text-xs font-mono font-semibold uppercase tracking-wider text-blue-700 mb-2">Подход LegacyLink</div>
+                    <h2 class="text-xl font-bold text-gray-900 mb-4">Прямой разбор бинарной структуры файлов</h2>
+                    <ul class="space-y-3 text-sm text-gray-700">
+                        <li class="flex items-start gap-2.5">
+                            <span class="font-mono text-emerald-600 font-bold mt-0.5">✓</span>
+                            <span><strong>Автоопределение по сигнатурам:</strong> распознаёт тип прибора по заголовкам и байтовым паттернам, даже если файл без расширения.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="font-mono text-emerald-600 font-bold mt-0.5">✓</span>
+                            <span><strong>Извлечение метаданных:</strong> помимо массива точек восстанавливает частоту дискретизации, масштаб, калибровку и дату замера.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <span class="font-mono text-emerald-600 font-bold mt-0.5">✓</span>
+                            <span><strong>Пакетная конвертация:</strong> переводит целые директории (100+ файлов) в стандартизированные таблицы за один запуск.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Линейная схема-инфографика «Было → Стало» -->
+            <div id="how-it-works" class="card-clean rounded-xl p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+                    <div>
+                        <span class="text-xs font-mono text-gray-500 uppercase">Архитектура преобразования</span>
+                        <h3 class="text-lg font-bold text-gray-900">Пайплайн обработки: от бинарного дампа до ERP и MATLAB</h3>
+                    </div>
+                    <span class="text-xs font-mono text-gray-500">Стек: Python • Kaitai Struct • NumPy</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-11 gap-4 items-center">
+                    <!-- Шаг 1 -->
+                    <div class="md:col-span-3 p-4 rounded-lg bg-gray-50 border border-gray-200">
+                        <div class="text-[11px] font-mono text-gray-500 mb-1">01. ИСХОДНЫЙ АРХИВ</div>
+                        <div class="font-bold text-gray-900 text-sm">Бинарный файл прибора</div>
+                        <div class="mt-2 flex flex-wrap gap-1 font-mono text-xs">
+                            <span class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-gray-700">.bin</span>
+                            <span class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-gray-700">.wfm</span>
+                            <span class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-gray-700">.spc</span>
+                            <span class="px-1.5 py-0.5 bg-white border border-gray-200 rounded text-gray-700">.dat</span>
+                        </div>
+                    </div>
+
+                    <!-- Стрелка 1 -->
+                    <div class="md:col-span-1 flex justify-center text-gray-400 font-mono text-lg">
+                        <span class="hidden md:inline">→</span>
+                        <span class="md:hidden">↓</span>
+                    </div>
+
+                    <!-- Шаг 2 -->
+                    <div class="md:col-span-3 p-4 rounded-lg bg-blue-50/70 border border-blue-200">
+                        <div class="text-[11px] font-mono text-blue-700 font-semibold mb-1">02. ЯДРО LEGACYLINK</div>
+                        <div class="font-bold text-gray-900 text-sm">Анализатор сигнатур</div>
+                        <p class="text-xs text-gray-600 mt-1.5">
+                            Определение смещений (offset), типов данных (int16/float32) и калибровочных заголовков.
+                        </p>
+                    </div>
+
+                    <!-- Стрелка 2 -->
+                    <div class="md:col-span-1 flex justify-center text-gray-400 font-mono text-lg">
+                        <span class="hidden md:inline">→</span>
+                        <span class="md:hidden">↓</span>
+                    </div>
+
+                    <!-- Шаг 3 -->
+                    <div class="md:col-span-3 p-4 rounded-lg bg-emerald-50/70 border border-emerald-200">
+                        <div class="text-[11px] font-mono text-emerald-700 font-semibold mb-1">03. РЕЗУЛЬТАТ</div>
+                        <div class="font-bold text-gray-900 text-sm">Открытый формат + метаданные</div>
+                        <div class="mt-2 flex flex-wrap gap-1 font-mono text-xs">
+                            <span class="px-1.5 py-0.5 bg-white border border-emerald-200 rounded text-emerald-800">CSV</span>
+                            <span class="px-1.5 py-0.5 bg-white border border-emerald-200 rounded text-emerald-800">MATLAB</span>
+                            <span class="px-1.5 py-0.5 bg-white border border-emerald-200 rounded text-emerald-800">SQLite</span>
+                            <span class="px-1.5 py-0.5 bg-white border border-emerald-200 rounded text-emerald-800">ERP</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 4. ДЛЯ КОГО И СРАВНИТЕЛЬНАЯ ТАБЛИЦА -->
+    <section class="py-14 sm:py-16 bg-white border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+            
+            <!-- 3 карточки сегментов -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Кому и какие задачи решает</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="p-5 rounded-xl bg-surface border border-gray-200">
+                        <div class="text-xs font-mono text-blue-700 font-semibold mb-1.5">01 / ПРОМЫШЛЕННОСТЬ</div>
+                        <h3 class="font-bold text-gray-900 text-base mb-2">Заводы, фабрики и ТЭЦ</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            Пакетная выгрузка многолетних архивов осциллограмм и виброспектров со стендов контроля для переноса в современные ERP/MES-системы.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-xl bg-surface border border-gray-200">
+                        <div class="text-xs font-mono text-blue-700 font-semibold mb-1.5">02 / НАУКА И ОБРАЗОВАНИЕ</div>
+                        <h3 class="font-bold text-gray-900 text-base mb-2">НИИ и технические вузы</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            Преобразование массивов исторических экспериментов (10–20 лет) в чистые датасеты для расчётов в Python и MATLAB без потери точности.
+                        </p>
+                    </div>
+
+                    <div class="p-5 rounded-xl bg-surface border border-gray-200">
+                        <div class="text-xs font-mono text-blue-700 font-semibold mb-1.5">03 / СЕРВИС И ПОВЕРКА</div>
+                        <h3 class="font-bold text-gray-900 text-base mb-2">Инженерные и метрологические центры</h3>
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            Чтение файлов с приборов, снятых с поддержки производителем, без содержания парка старых ПК с Windows XP.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Компактная сравнительная таблица -->
+            <div>
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Сравнение с существующими способами</h3>
+                <div class="overflow-x-auto rounded-xl border border-gray-200">
+                    <table class="w-full text-left border-collapse text-sm min-w-[640px]">
+                        <thead>
+                            <tr class="bg-gray-50 border-b border-gray-200 text-xs font-mono text-gray-600 uppercase">
+                                <th class="py-3.5 px-4">Критерий</th>
+                                <th class="py-3.5 px-4 bg-blue-50/70 text-blue-800 font-semibold">LegacyLink</th>
+                                <th class="py-3.5 px-4">VirtualBox + WinXP</th>
+                                <th class="py-3.5 px-4">Самописные скрипты</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr>
+                                <td class="py-3 px-4 font-medium text-gray-900">Запуск на Windows 10/11</td>
+                                <td class="py-3 px-4 bg-blue-50/30 text-emerald-700 font-medium">Нативное приложение</td>
+                                <td class="py-3 px-4 text-gray-600">Требуется эмулятор и образ ОС</td>
+                                <td class="py-3 px-4 text-gray-600">Да, но нужен разработчик</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 font-medium text-gray-900">Пакетная конвертация папок</td>
+                                <td class="py-3 px-4 bg-blue-50/30 text-emerald-700 font-medium">Да (очереди 100+ файлов)</td>
+                                <td class="py-3 px-4 text-gray-600">Нет (ручной экспорт по 1 файлу)</td>
+                                <td class="py-3 px-4 text-gray-600">Требует доработки под каждый тип</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 font-medium text-gray-900">Автоизвлечение метаданных</td>
+                                <td class="py-3 px-4 bg-blue-50/30 text-emerald-700 font-medium">Частота, масштаб, дата</td>
+                                <td class="py-3 px-4 text-gray-600">Зависит от старого ПО</td>
+                                <td class="py-3 px-4 text-gray-600">Ручной поиск байтовых смещений</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 font-medium text-gray-900">Поддержка редких приборов</td>
+                                <td class="py-3 px-4 bg-blue-50/30 text-emerald-700 font-medium">Расширяемая база + на заказ</td>
+                                <td class="py-3 px-4 text-gray-600">Нужен дистрибутив и ключ прибора</td>
+                                <td class="py-3 px-4 text-gray-600">Пишется с нуля под один прибор</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 5. РЫНОК (TAM / SAM / SOM) И ВАРИАНТЫ ПОЛУЧЕНИЯ ПРОДУКТА -->
+    <section id="pricing" class="py-14 sm:py-16 border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 space-y-12">
+            
+            <!-- Инфографика рынка TAM / SAM / SOM -->
+            <div class="card-clean rounded-xl p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 mb-6">
+                    <div>
+                        <span class="text-xs font-mono text-gray-500 uppercase">Оценка рынка РФ (B2B)</span>
+                        <h2 class="text-2xl font-bold text-gray-900">Объём целевого сегмента (TAM / SAM / SOM)</h2>
+                    </div>
+                    <span class="text-xs font-mono text-gray-500">Средний чек: ~100 000 ₽ (лицензия + модули)</span>
+                </div>
+
+                <div class="space-y-5">
+                    <!-- TAM -->
+                    <div>
+                        <div class="flex flex-wrap justify-between text-sm mb-1.5 gap-2">
+                            <span class="font-semibold text-gray-900">TAM — Все потенциальные организации РФ</span>
+                            <span class="font-mono font-semibold text-gray-900">~49 200 организаций</span>
+                        </div>
+                        <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                            <div class="h-full bg-gray-400 rounded-full" style="width: 100%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">
+                            ~45 000 промпредприятий, ~1 200 технических НИИ и вузов, ~3 000 инженерных и сервисных центров.
+                        </p>
+                    </div>
+
+                    <!-- SAM -->
+                    <div>
+                        <div class="flex flex-wrap justify-between text-sm mb-1.5 gap-2">
+                            <span class="font-semibold text-gray-900">SAM — Организации с архивами измерений старше 10 лет</span>
+                            <span class="font-mono font-semibold text-blue-700">~9 500 организаций (15–20%)</span>
+                        </div>
+                        <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                            <div class="h-full bg-blue-600 rounded-full" style="width: 38%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">
+                            ~8 000–9 000 заводов со старыми стендами и ~500 НИИ с архивами 1990–2010 гг. (бюджет на ПО: 50–500 тыс. ₽/год).
+                        </p>
+                    </div>
+
+                    <!-- SOM -->
+                    <div>
+                        <div class="flex flex-wrap justify-between text-sm mb-1.5 gap-2">
+                            <span class="font-semibold text-gray-900">SOM — Достижимая доля рынка за 3 года</span>
+                            <span class="font-mono font-semibold text-emerald-700">300–500 клиентов • 30–50 млн ₽/год</span>
+                        </div>
+                        <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden border border-gray-200">
+                            <div class="h-full bg-emerald-600 rounded-full" style="width: 14%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Занятие 5–10% доступного сегмента через прямые продажи B2B и системных интеграторов.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 варианта получения продукта -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">Форматы работы и внедрения</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Тариф 1 -->
+                    <div class="card-clean rounded-xl p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="text-xs font-mono text-gray-500 uppercase mb-1">Пилот</div>
+                            <h3 class="text-lg font-bold text-gray-900">Бесплатный тест</h3>
+                            <div class="text-2xl font-bold font-mono text-gray-900 my-3">0 ₽ <span class="text-xs font-normal text-gray-500">/ до 3 файлов</span></div>
+                            <p class="text-sm text-gray-600 mb-5">
+                                Проверка совместимости ваших архивов. Вы присылаете образцы — мы возвращаем готовые CSV и отчёт по метаданным.
+                            </p>
+                        </div>
+                        <a href="#contacts" onclick="presetRequest('Бесплатный тест (до 3 файлов)')" class="w-full py-2.5 px-4 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-900 text-sm font-medium text-center transition-colors">
+                            Проверить 3 файла
+                        </a>
+                    </div>
+
+                    <!-- Тариф 2 -->
+                    <div class="rounded-xl p-6 bg-white border-2 border-blue-700 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-mono text-blue-700 font-semibold uppercase">Основной B2B</span>
+                                <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-blue-50 text-blue-700">Win 10/11</span>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-900">Коробочная лицензия / SaaS</h3>
+                            <div class="text-2xl font-bold font-mono text-gray-900 my-3">от 50 000 ₽ <span class="text-xs font-normal text-gray-500">/ рабочее место</span></div>
+                            <p class="text-sm text-gray-600 mb-5">
+                                Локальная установка в закрытый контур предприятия (без интернета) или подписка на веб-версию. Пакетная обработка без ограничений.
+                            </p>
+                        </div>
+                        <a href="#contacts" onclick="presetRequest('Запрос лицензии / КП')" class="w-full py-2.5 px-4 rounded-lg bg-blue-700 hover:bg-blue-800 text-white text-sm font-medium text-center transition-colors">
+                            Запросить КП
+                        </a>
+                    </div>
+
+                    <!-- Тариф 3 -->
+                    <div class="card-clean rounded-xl p-6 flex flex-col justify-between">
+                        <div>
+                            <div class="text-xs font-mono text-gray-500 uppercase mb-1">R&D под задачу</div>
+                            <h3 class="text-lg font-bold text-gray-900">Разбор формата под заказ</h3>
+                            <div class="text-2xl font-bold font-mono text-gray-900 my-3">По ТЗ <span class="text-xs font-normal text-gray-500">/ работа по NDA</span></div>
+                            <p class="text-sm text-gray-600 mb-5">
+                                Reverse-engineering редкого или самописного формата прибора по вашим образцам с выпуском отдельного плагина-дешифратора.
+                            </p>
+                        </div>
+                        <a href="#contacts" onclick="presetRequest('Разбор редкого формата под заказ')" class="w-full py-2.5 px-4 rounded-lg border border-gray-300 hover:bg-gray-50 text-gray-900 text-sm font-medium text-center transition-colors">
+                            Обсудить формат
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 6. КОМАНДА, КОНТАКТЫ И ФОРМА ОБРАТНОЙ СВЯЗИ -->
+    <section id="contacts" class="py-14 sm:py-16 bg-white">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                
+                <!-- Левая колонка: Команда и прямые контакты (6 колонок) -->
+                <div class="lg:col-span-6 space-y-6">
+                    <div>
+                        <div class="text-xs font-mono text-gray-500 uppercase mb-1">Команда и компетенции</div>
+                        <h2 class="text-2xl font-bold text-gray-900">Разработка и контакты</h2>
+                    </div>
+
+                    <!-- Лидер проекта -->
+                    <div class="p-5 rounded-xl bg-surface border border-gray-200 space-y-3">
+                        <div class="flex items-center gap-3.5">
+                            <div class="w-12 h-12 rounded-lg bg-gray-900 text-white font-mono font-bold flex items-center justify-center text-base shrink-0">
+                                КА
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-900 text-base">Каримов Алмаз Эльмирович</div>
+                                <div class="text-xs text-gray-600">Лидер проекта, Backend-разработчик</div>
+                            </div>
+                        </div>
+                        <p class="text-sm text-gray-600 leading-relaxed">
+                            Победитель трека «Цифровой прорыв» (Team Lead), финалист стажировки VK Backend, участник Школы 21 от СберБанка. Опыт вывода API в продакшен и менторства разработчиков.
+                        </p>
+                        <div class="pt-2 border-t border-gray-200 text-xs font-mono text-gray-600">
+                            <span class="font-semibold text-gray-800">Стек проекта:</span> Python, NumPy/Pandas, Kaitai Struct, PyQt/PySide, FastAPI, Yandex Cloud.
+                        </div>
+                    </div>
+
+                    <!-- Прямые контакты -->
+                    <div class="space-y-2.5 text-sm">
+                        <div class="text-xs font-mono text-gray-500 uppercase">Прямая связь по продукту и пилотам</div>
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-4 font-mono">
+                            <a href="tel:+79961040617" class="text-gray-900 hover:text-blue-700 font-medium">
+                                +7 (996) 104-06-17
+                            </a>
+                            <span class="hidden sm:inline text-gray-300">|</span>
+                            <a href="mailto:karimvoalmaz900@gmail.com" class="text-gray-900 hover:text-blue-700 font-medium">
+                                karimvoalmaz900@gmail.com
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Правая колонка: Простая форма обратной связи (6 колонок) -->
+                <div class="lg:col-span-6">
+                    <div class="p-6 sm:p-7 rounded-xl bg-surface border border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">Отправить образец или запросить лицензию</h3>
+                        <p class="text-xs text-gray-600 mb-5">
+                            Опишите модель прибора или приложите расширение файла. Возможна работа по двустороннему NDA.
+                        </p>
+
+                        <form id="contactForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Имя и организация *</label>
+                                <input type="text" required placeholder="Например: Алексей Смирнов, ЦСМ / НИИ" class="w-full px-3.5 py-2.5 rounded-lg bg-white border border-gray-300 text-sm text-gray-900 focus:outline-none focus:border-blue-700">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Телефон или Telegram *</label>
+                                    <input type="text" required placeholder="+7 (999) 000-00-00" class="w-full px-3.5 py-2.5 rounded-lg bg-white border border-gray-300 text-sm text-gray-900 focus:outline-none focus:border-blue-700">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Тип запроса</label>
+                                    <select id="requestTypeSelect" class="w-full px-3.5 py-2.5 rounded-lg bg-white border border-gray-300 text-sm text-gray-900 focus:outline-none focus:border-blue-700">
+                                        <option value="Бесплатный тест на 3 файлах">Бесплатный тест на 3 файлах</option>
+                                        <option value="Запрос лицензии / КП">Запрос лицензии / КП</option>
+                                        <option value="Разбор редкого формата под заказ">Разбор редкого формата под заказ</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Модель прибора / расширение файлов</label>
+                                <textarea rows="2" placeholder="Укажите прибор (например, Tektronix, АКИП, L-Card) и расширения файлов (.bin, .dat...)" class="w-full px-3.5 py-2.5 rounded-lg bg-white border border-gray-300 text-sm text-gray-900 focus:outline-none focus:border-blue-700"></textarea>
+                            </div>
+
+                            <div class="flex items-center gap-2 text-xs text-gray-600">
+                                <input type="checkbox" id="ndaBox" class="rounded border-gray-300 text-blue-700 focus:ring-blue-700">
+                                <label for="ndaBox">Требуется подписание соглашения о конфиденциальности (NDA)</label>
+                            </div>
+
+                            <button type="submit" class="w-full py-3 px-4 rounded-lg bg-blue-700 hover:bg-blue-800 text-white font-medium text-sm transition-colors cursor-pointer">
+                                Отправить заявку
+                            </button>
+                        </form>
+
+                        <!-- Сообщение после отправки -->
+                        <div id="formSuccessBox" class="hidden py-6 text-center space-y-2">
+                            <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 font-bold">✓</div>
+                            <div class="font-bold text-gray-900">Заявка отправлена</div>
+                            <p class="text-xs text-gray-600">
+                                Мы свяжемся с вами в рабочее время для уточнения деталей и передачи тестовых файлов.
+                            </p>
+                            <button onclick="resetForm()" class="mt-2 text-xs font-mono text-blue-700 hover:underline cursor-pointer">
+                                Отправить ещё один запрос
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- СТРОГИЙ ФУТЕР -->
+    <footer class="bg-surface border-t border-gray-200 py-8">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-gray-500">
+            <div>
+                <span class="font-semibold text-gray-800">LegacyLink</span> • Заявка №627768 • Каримов А.Э., 2026
+            </div>
+            <div class="flex flex-wrap gap-x-4 gap-y-1">
+                <span>Минобрнауки России</span>
+                <span>•</span>
+                <span>Платформа университетского технологического предпринимательства</span>
+                <span>•</span>
+                <span>Фонд содействия инновациям (ФП «Технологии»)</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ИНТЕРАКТИВНЫЙ СКРИПТ ДЛЯ ПРЕВЬЮ ПРОГРАММЫ И ФОРМЫ -->
+    <script>
+        const devicePresets = {
+            osc: {
+                fileName: 'osc_1999.bin',
+                status: '[OK] Сигнатура распознана: Tektronix Binary (Offset 0x0040, Float32)',
+                points: '4 096 точек',
+                freq: '100.0 кГц',
+                scale: '2.50 В/дел',
+                date: '14.11.1999',
+                label: 'CH1: Напряжение (В) / Время (мс)',
+                type: 'osc',
+                csvHeader: 'time_ms,channel_1_V,channel_2_V',
+                csvRows: [
+                    '0.000,0.124,0.012',
+                    '0.010,1.482,0.340',
+                    '0.020,2.891,0.715',
+                    '0.030,1.904,0.510',
+                    '0.040,-0.642,-0.180'
+                ]
+            },
+            spec: {
+                fileName: 'spec_2004.dat',
+                status: '[OK] Сигнатура распознана: Спектрометр XP (Offset 0x0120, Int16 PCM)',
+                points: '2 048 гармоник',
+                freq: '0 – 20 кГц',
+                scale: '1.00 м/с²',
+                date: '22.05.2004',
+                label: 'Спектр: Амплитуда (дБ) / Частота (Гц)',
+                type: 'spec',
+                csvHeader: 'freq_Hz,amplitude_dB,phase_deg',
+                csvRows: [
+                    '50.0,-12.4,14.2',
+                    '100.0,-28.1,45.0',
+                    '150.0,-19.7,88.4',
+                    '200.0,-41.0,112.1',
+                    '250.0,-53.8,160.5'
+                ]
+            },
+            logic: {
+                fileName: 'dump_01.wfm',
+                status: '[OK] Сигнатура распознана: L-Card АЦП (Offset 0x0080, 12-bit ADC)',
+                points: '8 192 такта',
+                freq: '1.0 МГц',
+                scale: '5.00 В (TTL)',
+                date: '09.09.2001',
+                label: 'D0: Логический уровень (В) / Такты',
+                type: 'logic',
+                csvHeader: 'sample_id,adc_raw,voltage_V',
+                csvRows: [
+                    '1024,2048,0.00',
+                    '1025,3890,4.50',
+                    '1026,3912,4.55',
+                    '1027,1024,-2.50',
+                    '1028,2055,0.02'
+                ]
+            }
+        };
+
+        let activeDevice = 'osc';
+
+        function switchDevice(key) {
+            activeDevice = key;
+            const d = devicePresets[key];
+
+            // Переключение стилей табов
+            ['osc', 'spec', 'logic'].forEach(k => {
+                const el = document.getElementById('tab-' + k);
+                if (k === key) {
+                    el.className = 'px-2.5 py-1 rounded text-xs font-mono font-medium bg-white text-blue-700 border border-gray-300 shadow-2xs cursor-pointer';
+                } else {
+                    el.className = 'px-2.5 py-1 rounded text-xs font-mono text-gray-600 hover:text-gray-900 border border-transparent cursor-pointer';
+                }
+            });
+
+            document.getElementById('app-sig-status').textContent = d.status;
+            document.getElementById('app-points-count').textContent = d.points;
+            document.getElementById('meta-freq').textContent = d.freq;
+            document.getElementById('meta-scale').textContent = d.scale;
+            document.getElementById('meta-date').textContent = d.date;
+            document.getElementById('chart-label').textContent = d.label;
+
+            renderPreviewChart(d.type);
+        }
+
+        function renderPreviewChart(type) {
+            const canvas = document.getElementById('appPreviewCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            const rect = canvas.parentElement.getBoundingClientRect();
+
+            canvas.width = rect.width * dpr;
+            canvas.height = rect.height * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            const w = rect.width;
+            const h = rect.height;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Тонкая инженерная сетка
+            ctx.strokeStyle = '#F3F4F6';
+            ctx.lineWidth = 1;
+            for (let x = 0; x <= w; x += 32) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+            }
+            for (let y = 0; y <= h; y += 32) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+            }
+
+            // Ось нуля
+            ctx.strokeStyle = '#E5E7EB';
+            ctx.beginPath();
+            ctx.moveTo(0, h / 2);
+            ctx.lineTo(w, h / 2);
+            ctx.stroke();
+
+            ctx.strokeStyle = '#1D4ED8';
+            ctx.fillStyle = '#1D4ED8';
+            ctx.lineWidth = 1.75;
+
+            if (type === 'osc') {
+                ctx.beginPath();
+                for (let x = 0; x < w; x += 2) {
+                    const norm = x / w;
+                    const env = Math.exp(-norm * 1.5);
+                    const y = h / 2 - Math.sin(norm * Math.PI * 10) * (h * 0.38) * env;
+                    if (x === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            } else if (type === 'spec') {
+                const bars = 30;
+                const step = w / bars;
+                for (let i = 0; i < bars; i++) {
+                    let amp = Math.abs(Math.sin(i * 0.8)) * 0.35 + 0.08;
+                    if (i === 4 || i === 11 || i === 18) amp = 0.85 - i * 0.015;
+                    const barH = amp * (h - 16);
+                    ctx.fillRect(i * step + 3, h - barH - 4, step * 0.55, barH);
+                }
+            } else {
+                ctx.beginPath();
+                const steps = 16;
+                const stepW = w / steps;
+                for (let i = 0; i < steps; i++) {
+                    const high = (i % 3 === 0 || i % 5 === 0);
+                    const y = high ? h * 0.22 : h * 0.78;
+                    const x = i * stepW;
+                    if (i === 0) ctx.moveTo(x, y);
+                    else ctx.lineTo(x, y);
+                    ctx.lineTo(x + stepW, y);
+                }
+                ctx.stroke();
+            }
+        }
+
+        function downloadSampleCsv() {
+            const d = devicePresets[activeDevice];
+            const content = [
+                `# LegacyLink Export (${d.fileName})`,
+                `# Fs: ${d.freq} | Scale: ${d.scale} | Date: ${d.date}`,
+                d.csvHeader,
+                ...d.csvRows
+            ].join('\n');
+
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = d.fileName.replace(/\.[^/.]+$/, '') + '_converted.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function presetRequest(val) {
+            const select = document.getElementById('requestTypeSelect');
+            if (!select) return;
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value.includes(val.split(' ')[0])) {
+                    select.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            document.getElementById('contactForm').classList.add('hidden');
+            document.getElementById('formSuccessBox').classList.remove('hidden');
+        }
+
+        function resetForm() {
+            document.getElementById('contactForm').reset();
+            document.getElementById('formSuccessBox').classList.add('hidden');
+            document.getElementById('contactForm').classList.remove('hidden');
+        }
+
+        window.addEventListener('load', () => switchDevice('osc'));
+        window.addEventListener('resize', () => renderPreviewChart(devicePresets[activeDevice].type));
+    </script>
+</body>
+</html>
